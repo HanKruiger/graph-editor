@@ -1,8 +1,8 @@
-function Parameter(_name, _value, _maxValue) {
+function Parameter(_name, _initial_value, _maxValue) {
     this.name = _name;
     this.maxValue = _maxValue;
     this.index = Parameter.numParams++;
-    this.slider = createSlider(0, 100, this.value * 100 / this.maxValue);
+    this.slider = createSlider(0, 100, _initial_value * 100 / this.maxValue);
     this.slider.position(20, 20 + 30 * this.index);
 }
 
