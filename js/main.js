@@ -3,7 +3,10 @@ var running = true;
 
 // Processing setup function
 function setup() {
-    createCanvas(1280, 720);
+    var canvas = createCanvas(1280, 720);
+
+    // Place the canvas in the HTML container.
+    canvas.parent('canvascontainer');
 
     var params = {
         step_size:          new Parameter("Step size", 1, 20),
@@ -20,18 +23,25 @@ function setup() {
 
 // Processing draw function
 function draw() {
-    background(200);
     if (running) {
+        background(200);
         graph.update();
         graph.display();
     }
 }
 
+// Processing keyTyped function
 function keyTyped() {
-    if (key === 'v') {
-        graph.addRandomVertexWithEdge();
-    } else if (key === 'p') {
+    if (key === 'p') {
         running = !running;
     }
     return false; // prevent any default behavior
+}
+
+function mousePressed() {
+    if (keyIsDown(71) || keyIsDown(103)) {
+        graph.moveGravity(createVector(mouseX, mouseY));
+    } else if (keyIsDown(86) || keyIsDown(118)) {
+        graph.addVertexToClosest(createVector(mouseX, mouseY));
+    }
 }
