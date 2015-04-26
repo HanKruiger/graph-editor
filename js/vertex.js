@@ -1,7 +1,12 @@
 function Vertex(_position) {
     this.position = _position.copy();
     this.force = createVector(0, 0);
+    this.radius = 12;
     this.neighbours = [];
+}
+
+Vertex.prototype.moveTo = function(position) {
+    this.position = position.copy();
 }
 
 // Apply a force to the vertex
@@ -24,8 +29,5 @@ Vertex.prototype.update = function(step_size) {
 
 // Method to display
 Vertex.prototype.display = function() {
-    stroke(0);
-    strokeWeight(2);
-    fill(128);
-    ellipse(this.position.x, this.position.y, 12, 12);
+    ellipse(this.position.x, this.position.y, this.radius, this.radius);
 };

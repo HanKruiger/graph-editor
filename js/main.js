@@ -9,11 +9,11 @@ function setup() {
     canvas.parent('canvascontainer');
 
     var params = {
-        step_size:          new Parameter("Step size", 1, 20),
-        spring_constant:    new Parameter("Spring constant", 0.1, 0.2),
-        spring_length:      new Parameter("Natural spring length", 40, 100),
+        step_size: new Parameter("Step size", 1, 20),
+        spring_constant: new Parameter("Spring constant", 0.1, 0.2),
+        spring_length: new Parameter("Natural spring length", 40, 100),
         repulsion_constant: new Parameter("Repulsion constant", 800, 2000),
-        gravity_constant:   new Parameter("Gravity constant", 1, 5),
+        gravity_constant: new Parameter("Gravity constant", 1, 5),
     };
 
     graph = new Graph(createVector(width / 2, height / 2), params);
@@ -43,5 +43,11 @@ function mousePressed() {
         graph.moveGravity(createVector(mouseX, mouseY));
     } else if (keyIsDown(86) || keyIsDown(118)) {
         graph.addVertexToClosest(createVector(mouseX, mouseY));
+    } else {
+        graph.select(createVector(mouseX, mouseY));
     }
+}
+
+function mouseDragged() {
+    graph.dragTo(createVector(mouseX, mouseY));
 }

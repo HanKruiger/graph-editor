@@ -3,6 +3,7 @@ function Graph(_position, _params) {
     this.params = _params;
     this.vertices = [];
     this.edges = [];
+    this.selected = null;
 }
 
 // Add a vertex to the graph. Assign it a random position on the screen.
@@ -57,9 +58,29 @@ Graph.prototype.addVertexToClosest = function(position) {
     return v1;
 };
 
+Graph.prototype.select = function(position) {
+    for (var i = 0; i < this.vertices.length; i++) {
+        var v = this.vertices[i];
+        var distance = p5.Vector.dist(position, v.position);
+        if (distance < v.radius) {
+            this.selected = v;
+            console.log('Selected vertex ' + i);
+            return;
+        }
+    }
+    // Remove selection when nothing was clicked.
+    this.selected = null;
+}
+
+Graph.prototype.dragTo = function(position) {
+    if (this.selected !== null) {
+        this.selected.moveTo(position);
+    }
+}
+
 Graph.prototype.moveGravity = function(position) {
     this.origin = position.copy();
-}
+};
 
 // Update all vertices and edges.
 Graph.prototype.update = function() {
@@ -90,13 +111,24 @@ Graph.prototype.update = function() {
 
 // Display all vertices and edges.
 Graph.prototype.display = function() {
+    stroke(0);
+    strokeWeight(2);
     for (var i = 0; i < this.edges.length; i++) {
         this.edges[i].display();
     }
+    
     for (i = 0; i < this.vertices.length; i++) {
+        if (this.selected === this.vertices[i]) {
+            fill(255);
+            console.log('Changed color to selected!');
+        } else {
+            fill(128);
+        }
         this.vertices[i].display();
     }
 
+    // Draw the parameter texts in black.
+    fill(0);
     strokeWeight(0);
     for (var param in this.params) {
         this.params[param].display();
