@@ -1,7 +1,7 @@
 function Vertex(_position) {
     this.position = _position.copy();
     this.force = createVector(0, 0);
-    this.radius = 12;
+    this.radius = 16;
     this.neighbours = [];
 }
 
