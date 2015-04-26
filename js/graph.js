@@ -118,6 +118,10 @@ Graph.prototype.update = function() {
         // USE THE FORCE
         this.vertices[i].update(this.params.step_size.value());
     }
+
+    if (this.hasSelected() && mouseIsPressed) {
+        this.selected.moveTo(createVector(mouseX, mouseY));
+    }
 };
 
 // Display all vertices and edges.

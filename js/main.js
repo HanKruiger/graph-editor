@@ -39,9 +39,9 @@ function keyTyped() {
 }
 
 function mousePressed() {
-    if (keyIsDown(71) || keyIsDown(103)) {
+    if (keyIsDown(71) || keyIsDown(103)) { // 'g' or 'G'
         graph.moveGravity(createVector(mouseX, mouseY));
-    } else if (keyIsDown(86) || keyIsDown(118)) {
+    } else if (keyIsDown(86) || keyIsDown(118)) { // 'v' or 'V'
         if (!graph.hasSelected()) {
             graph.addVertexToClosest(createVector(mouseX, mouseY));
         } else {
@@ -49,13 +49,5 @@ function mousePressed() {
         }
     } else {
         graph.select(createVector(mouseX, mouseY));
-    }
-}
-
-function mouseDragged() {
-    if (graph.hasSelected()) {
-        graph.dragTo(createVector(mouseX, mouseY));
-    } else {
-        console.log('Do something else.');
     }
 }
