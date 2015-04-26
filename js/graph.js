@@ -58,6 +58,13 @@ Graph.prototype.addVertexToClosest = function(position) {
     return v1;
 };
 
+Graph.prototype.addVertexToSelected = function() {
+    var v = new Vertex(this.selected.position);
+    this.vertices.push(v);
+    this.addEdge(v, this.selected);
+    return v;
+};
+
 Graph.prototype.select = function(position) {
     for (var i = 0; i < this.vertices.length; i++) {
         var v = this.vertices[i];
@@ -70,7 +77,11 @@ Graph.prototype.select = function(position) {
     }
     // Remove selection when nothing was clicked.
     this.selected = null;
-}
+};
+
+Graph.prototype.hasSelected = function() {
+    return this.selected !== null;
+};
 
 Graph.prototype.dragTo = function(position) {
     if (this.selected !== null) {
@@ -120,7 +131,6 @@ Graph.prototype.display = function() {
     for (i = 0; i < this.vertices.length; i++) {
         if (this.selected === this.vertices[i]) {
             fill(255);
-            console.log('Changed color to selected!');
         } else {
             fill(128);
         }

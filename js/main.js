@@ -42,12 +42,20 @@ function mousePressed() {
     if (keyIsDown(71) || keyIsDown(103)) {
         graph.moveGravity(createVector(mouseX, mouseY));
     } else if (keyIsDown(86) || keyIsDown(118)) {
-        graph.addVertexToClosest(createVector(mouseX, mouseY));
+        if (!graph.hasSelected()) {
+            graph.addVertexToClosest(createVector(mouseX, mouseY));
+        } else {
+            graph.addVertexToSelected();
+        }
     } else {
         graph.select(createVector(mouseX, mouseY));
     }
 }
 
 function mouseDragged() {
-    graph.dragTo(createVector(mouseX, mouseY));
+    if (graph.hasSelected()) {
+        graph.dragTo(createVector(mouseX, mouseY));
+    } else {
+        console.log('Do something else.');
+    }
 }
