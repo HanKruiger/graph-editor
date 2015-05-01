@@ -1,39 +1,31 @@
-// Static counter that increments every time a new object is made.
-Parameter.numParams = [0, 0, 0, 0];
+function Parameter(name, initialValue, maxValue, orientation, callbackObject, callbackFunction) {
+    this.name = name;
+    this.maxValue = maxValue;
 
-Parameter.orientationEnum = {
-	NORTH_EAST: 0,
-	SOUTH_EAST: 1,
-	SOUTH_WEST: 2,
-	NORTH_WEST: 3
-}
+    // Create the container in which the text and slider will be placed.
+    this.container = createDiv('').class('parameter');
 
-function Parameter(_name, _initial_value, _maxValue, _orientation, _callbackObject, _callbackFunction) {
-    this.name = _name;
-    this.maxValue = _maxValue;
-    this.orientation = _orientation;
-    this.index = Parameter.numParams[this.orientation]++;
-    this.slider = createSlider(0, 100, _initial_value * 100 / this.maxValue);
-
-    if (this.orientation == Parameter.orientationEnum.NORTH_WEST) {
-    	this.slider.position(20, 30 + 50 * this.index);
-    	this.textPosition = createVector(10, 20 + 50 * this.index);
-    } else if (this.orientation == Parameter.orientationEnum.NORTH_EAST) {
-    	this.slider.position(width - 150, 30 + 50 * this.index);
-    	this.textPosition = createVector(width - 10, 20 + 50 * this.index);
-    } else if (this.orientation == Parameter.orientationEnum.SOUTH_EAST) {
-    	this.slider.position(width - 150, height - (30 + 50 * this.index));
-    	this.textPosition = createVector(width - 10, height - (40 + 50 * this.index));
-    } else if (this.orientation == Parameter.orientationEnum.SOUTH_WEST) {
-    	this.slider.position(20, height - (30 + 50 * this.index));
-    	this.textPosition = createVector(10, height - (40 + 50 * this.index));
+    // Place the container in the right parameter container.
+    if (orientation === 'left') {
+        this.container.parent('parameters_left');
+    } else if (orientation === 'right') {
+        this.container.parent('parameters_right');
     } else {
-    	console.error("'orientation' must be one of the values defined in Parameter.orientationEnum.");
+        console.error("'orientation' must be one of the values defined in Parameter.orientationEnum.");
     }
 
+    // Create the text element and add it to the container.
+    this.text = createP(name + ': ' + initialValue.toFixed(2)).parent(this.container);
+
+    // Create the slider element and add it to the container.
+    this.slider = createSlider(0, 100, initialValue * 100 / this.maxValue).parent(this.container);
+
+    // Define the function that is to be called when the slider receives input.
     var me = this;
     this.slider.elt.oninput = function() {
-        _callbackFunction.call(_callbackObject, me.value());
+        console.log('value now: ' + me.value());
+        callbackFunction.call(callbackObject, me.value());
+        me.text.html(name + ': ' + me.value().toFixed(2));
     };
 }
 
@@ -42,17 +34,7 @@ Parameter.prototype.value = function() {
     return this.slider.value() * this.maxValue / 100.0;
 };
 
-// Display the parameter name and value next to the slider
-Parameter.prototype.display = function() {
-	if (this.orientation == Parameter.orientationEnum.NORTH_WEST || this.orientation == Parameter.orientationEnum.SOUTH_WEST) {
-		textAlign(LEFT);
-	} else {
-		textAlign(RIGHT);
-	}
-    text(this.name + ": " + this.value(), this.textPosition.x, this.textPosition.y);
-};
-
+// Removes the parameter's container and all child elements.
 Parameter.prototype.remove = function() {
-	Parameter.numParams[this.orientation]--;
-	this.name = "If you see this, something went terribly wrong.";
-}
+    this.container.remove();
+};

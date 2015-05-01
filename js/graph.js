@@ -1,45 +1,46 @@
-function Graph(_position) {
-    this.origin = _position.copy();
+function Graph(position) {
+    this.origin = position.copy();
     this.vertices = [];
     this.edges = [];
     this.selected = null;
 
     // Initial global parameters
-    this.step_size = 1;
-    this.spring_constant = 0.1;
-    this.spring_length = 40;
-    this.repulsion_constant = 800;
-    this.gravity_constant = 1;
+    this.stepSize = 1;
+    this.springConstant = 0.1;
+    this.springLength = 40;
+    this.repulsionConstant = 800;
+    this.gravityConstant = 1;
 
-    this.params = {
-        step_size:
+    // Parameter objects live in the parameters object, which is a simple container.
+    this.parameters = {
+        stepSize:
             new Parameter(
-                "Step size", this.step_size, 20, Parameter.orientationEnum.NORTH_WEST, this, function(step_size) {
-                    this.step_size = step_size;
+                "Step size", this.stepSize, 20, 'left', this, function(stepSize) {
+                    this.stepSize = stepSize;
                 }
             ),
-        spring_constant:
+        springConstant:
             new Parameter(
-                "Spring constant", 0.1, 0.2, Parameter.orientationEnum.NORTH_WEST, this, function(spring_constant) {
-                    this.spring_constant = spring_constant;
+                "Spring constant", 0.1, 0.2, 'left', this, function(springConstant) {
+                    this.springConstant = springConstant;
                 }
             ),
-        spring_length:
+        springLength:
             new Parameter(
-                "Natural spring length", 40, 100, Parameter.orientationEnum.NORTH_WEST, this, function(spring_length) {
-                    this.spring_length = spring_length;
+                "Natural spring length", 40, 100, 'left', this, function(springLength) {
+                    this.springLength = springLength;
                 }
             ),
-        repulsion_constant:
+        repulsionConstant:
             new Parameter(
-                "Repulsion constant", 800, 2000, Parameter.orientationEnum.NORTH_WEST, this, function(repulsion_constant) {
-                    this.repulsion_constant = repulsion_constant;
+                "Repulsion constant", 800, 2000, 'left', this, function(repulsionConstant) {
+                    this.repulsionConstant = repulsionConstant;
                 }
             ),
-        gravity_constant:
+        gravityConstant:
             new Parameter(
-                "Gravity constant", 1, 5, Parameter.orientationEnum.NORTH_WEST, this, function(gravity_constant) {
-                    this.gravity_constant = gravity_constant;
+                "Gravity constant", 1, 5, 'left', this, function(gravityConstant) {
+                    this.gravityConstant = gravityConstant;
                 }
             )
     };
@@ -111,11 +112,25 @@ Graph.prototype.select = function(position) {
         if (distance < v.radius) {
             this.selected = v;
             console.log('Selected vertex ' + i);
+            if (this.parameters.selected != null) {
+                this.parameters.selected.remove();
+                delete this.parameters.selected;
+            }
+            this.parameters.selected = new Parameter(
+                "Radius", v.radius, 64, 'right', v, function(radius) {
+                    this.radius = radius;
+                }
+            );
             return;
         }
     }
+    
     // Remove selection when nothing was clicked.
     this.selected = null;
+    if (this.parameters.selected != null) {
+        this.parameters.selected.remove();
+        delete this.parameters.selected;
+    }
 };
 
 Graph.prototype.hasSelected = function() {
@@ -135,7 +150,7 @@ Graph.prototype.moveGravity = function(position) {
 // Update all vertices and edges.
 Graph.prototype.update = function() {
     for (i = 0; i < this.edges.length; i++) {
-        this.edges[i].update(this.spring_length, this.spring_constant);
+        this.edges[i].update(this.springLength, this.springConstant);
     }
     for (i = 0; i < this.vertices.length; i++) {
         var v1 = this.vertices[i];
@@ -146,16 +161,16 @@ Graph.prototype.update = function() {
             }
             var v2 = this.vertices[j];
             var distance = p5.Vector.dist(v2.position, v1.position);
-            var force = p5.Vector.sub(v2.position, v1.position).setMag(this.repulsion_constant / (distance * distance));
+            var force = p5.Vector.sub(v2.position, v1.position).setMag(this.repulsionConstant / (distance * distance));
             v2.applyForce(force);
         }
 
         // Social gravity (simply scaled by number of connections)
-        var grav_force = p5.Vector.sub(this.origin, v1.position).setMag(this.gravity_constant * v1.neighbours.length);
-        v1.applyForce(grav_force);
+        var gravForce = p5.Vector.sub(this.origin, v1.position).setMag(this.gravityConstant * v1.neighbours.length);
+        v1.applyForce(gravForce);
 
         // USE THE FORCE
-        this.vertices[i].update(this.step_size);
+        this.vertices[i].update(this.stepSize);
     }
 
     if (this.hasSelected() && mouseIsPressed) {
@@ -178,12 +193,5 @@ Graph.prototype.display = function() {
             fill(128);
         }
         this.vertices[i].display();
-    }
-
-    // Draw the parameter texts in black.
-    fill(0);
-    strokeWeight(0);
-    for (var param in this.params) {
-        this.params[param].display();
     }
 };

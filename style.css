@@ -1,0 +1,50 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+}
+
+#wrapper {
+    /* Everything after the elements will be on a 'newline' */
+    clear: both;
+    
+    /* Little hack to remove whitespace that causes 100% to be not quite 100% (http://stackoverflow.com/a/5078297) */
+    font-size: 0;
+}
+
+.parameter {
+    margin: 2px 30px;
+}
+
+#parameters_left {
+    width: 10%;
+    display: inline-block;
+    text-align: right;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+#parameters_right {
+    width: 10%;
+    display: inline-block;
+    text-align: left;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+#canvas_container {
+    width: 80%;
+    display: inline-block;
+    font-size: 14px;
+}
+
+#defaultCanvas {
+    display: inline-block;
+    margin: 0 auto;
+    width: 100%;
+
+    /* For no selection on double click (http://stackoverflow.com/a/880518) */
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}

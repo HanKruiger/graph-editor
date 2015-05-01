@@ -1,5 +1,5 @@
-function Vertex(_position) {
-    this.position = _position.copy();
+function Vertex(position) {
+    this.position = position.copy();
     this.force = createVector(0, 0);
     this.radius = 16;
     this.neighbours = [];
@@ -20,9 +20,9 @@ Vertex.prototype.addLink = function(neighbour) {
 };
 
 // Method to update position
-Vertex.prototype.update = function(step_size) {
+Vertex.prototype.update = function(stepSize) {
     if (this.force.mag() !== 0) {
-        this.position.add(this.force.setMag(step_size));
+        this.position.add(this.force.setMag(stepSize));
         this.force = createVector(0, 0);
     }
 };
