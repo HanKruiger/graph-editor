@@ -8,15 +8,7 @@ function setup() {
     // Place the canvas in the HTML container.
     canvas.parent('canvascontainer');
 
-    var params = {
-        step_size: new Parameter("Step size", 1, 20, Parameter.orientationEnum.NORTH_WEST),
-        spring_constant: new Parameter("Spring constant", 0.1, 0.2, Parameter.orientationEnum.NORTH_WEST),
-        spring_length: new Parameter("Natural spring length", 40, 100, Parameter.orientationEnum.NORTH_WEST),
-        repulsion_constant: new Parameter("Repulsion constant", 800, 2000, Parameter.orientationEnum.NORTH_WEST),
-        gravity_constant: new Parameter("Gravity constant", 1, 5, Parameter.orientationEnum.NORTH_WEST),
-    };
-
-    graph = new Graph(createVector(width / 2, height / 2), params);
+    graph = new Graph(createVector(width / 2, height / 2));
     graph.addVertex();
     graph.addRandomVertexWithEdge();
 }

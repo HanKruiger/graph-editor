@@ -8,12 +8,13 @@ Parameter.orientationEnum = {
 	NORTH_WEST: 3
 }
 
-function Parameter(_name, _initial_value, _maxValue, _orientation) {
+function Parameter(_name, _initial_value, _maxValue, _orientation, _callbackObject, _callbackFunction) {
     this.name = _name;
     this.maxValue = _maxValue;
     this.orientation = _orientation;
     this.index = Parameter.numParams[this.orientation]++;
     this.slider = createSlider(0, 100, _initial_value * 100 / this.maxValue);
+
     if (this.orientation == Parameter.orientationEnum.NORTH_WEST) {
     	this.slider.position(20, 30 + 50 * this.index);
     	this.textPosition = createVector(10, 20 + 50 * this.index);
@@ -29,6 +30,11 @@ function Parameter(_name, _initial_value, _maxValue, _orientation) {
     } else {
     	console.error("'orientation' must be one of the values defined in Parameter.orientationEnum.");
     }
+
+    var me = this;
+    this.slider.elt.oninput = function() {
+        _callbackFunction.call(_callbackObject, me.value());
+    };
 }
 
 // Retrieve the value of the parameter

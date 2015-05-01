@@ -1,9 +1,48 @@
-function Graph(_position, _params) {
+function Graph(_position) {
     this.origin = _position.copy();
-    this.params = _params;
     this.vertices = [];
     this.edges = [];
     this.selected = null;
+
+    // Initial global parameters
+    this.step_size = 1;
+    this.spring_constant = 0.1;
+    this.spring_length = 40;
+    this.repulsion_constant = 800;
+    this.gravity_constant = 1;
+
+    this.params = {
+        step_size:
+            new Parameter(
+                "Step size", this.step_size, 20, Parameter.orientationEnum.NORTH_WEST, this, function(step_size) {
+                    this.step_size = step_size;
+                }
+            ),
+        spring_constant:
+            new Parameter(
+                "Spring constant", 0.1, 0.2, Parameter.orientationEnum.NORTH_WEST, this, function(spring_constant) {
+                    this.spring_constant = spring_constant;
+                }
+            ),
+        spring_length:
+            new Parameter(
+                "Natural spring length", 40, 100, Parameter.orientationEnum.NORTH_WEST, this, function(spring_length) {
+                    this.spring_length = spring_length;
+                }
+            ),
+        repulsion_constant:
+            new Parameter(
+                "Repulsion constant", 800, 2000, Parameter.orientationEnum.NORTH_WEST, this, function(repulsion_constant) {
+                    this.repulsion_constant = repulsion_constant;
+                }
+            ),
+        gravity_constant:
+            new Parameter(
+                "Gravity constant", 1, 5, Parameter.orientationEnum.NORTH_WEST, this, function(gravity_constant) {
+                    this.gravity_constant = gravity_constant;
+                }
+            )
+    };
 }
 
 // Add a vertex to the graph. Assign it a random position on the screen.
@@ -96,7 +135,7 @@ Graph.prototype.moveGravity = function(position) {
 // Update all vertices and edges.
 Graph.prototype.update = function() {
     for (i = 0; i < this.edges.length; i++) {
-        this.edges[i].update(this.params.spring_length.value(), this.params.spring_constant.value());
+        this.edges[i].update(this.spring_length, this.spring_constant);
     }
     for (i = 0; i < this.vertices.length; i++) {
         var v1 = this.vertices[i];
@@ -107,16 +146,16 @@ Graph.prototype.update = function() {
             }
             var v2 = this.vertices[j];
             var distance = p5.Vector.dist(v2.position, v1.position);
-            var force = p5.Vector.sub(v2.position, v1.position).setMag(this.params.repulsion_constant.value() / (distance * distance));
+            var force = p5.Vector.sub(v2.position, v1.position).setMag(this.repulsion_constant / (distance * distance));
             v2.applyForce(force);
         }
 
         // Social gravity (simply scaled by number of connections)
-        var grav_force = p5.Vector.sub(this.origin, v1.position).setMag(this.params.gravity_constant.value() * v1.neighbours.length);
+        var grav_force = p5.Vector.sub(this.origin, v1.position).setMag(this.gravity_constant * v1.neighbours.length);
         v1.applyForce(grav_force);
 
         // USE THE FORCE
-        this.vertices[i].update(this.params.step_size.value());
+        this.vertices[i].update(this.step_size);
     }
 
     if (this.hasSelected() && mouseIsPressed) {
