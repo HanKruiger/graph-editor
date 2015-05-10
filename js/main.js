@@ -52,6 +52,10 @@ function canvasMousePressed() {
         } else {
             graph.addVertexToSelected();
         }
+    } else if (keyIsDown(69) || keyIsDown(101)) { // 'e' or 'E'
+        if (graph.hasSelected()) {
+            graph.addEdgeFromSelectedTo(createVector(mouseX, mouseY));
+        }
     } else {
         graph.select(createVector(mouseX, mouseY));
     }

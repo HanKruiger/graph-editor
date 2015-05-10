@@ -6,11 +6,11 @@ function Graph(position) {
 
     // Initial global parameters
     this.maxStepSize = 1;
-    this.springConstant = 0.1;
-    this.springLength = 40;
+    this.springConstant = 0.05;
+    this.springLength = 70;
     this.repulsionConstant = 800;
     this.touchRepulsionConstant = 80;
-    this.gravityConstant = 1;
+    this.gravityConstant = 0.1;
 
     // Parameter objects live in the parameters object, which is a simple container.
     this.parameters = {
@@ -34,7 +34,7 @@ function Graph(position) {
             ),
         repulsionConstant:
             new Parameter(
-                "Repulsion constant", this.repulsionConstant, 100, 'left', this, function(repulsionConstant) {
+                "Repulsion constant", this.repulsionConstant, 1000, 'left', this, function(repulsionConstant) {
                     this.repulsionConstant = repulsionConstant;
                 }
             ),
@@ -65,6 +65,26 @@ Graph.prototype.addEdge = function(v1, v2) {
     this.edges.push(new Edge(v1, v2));
 };
 
+Graph.prototype.addEdgeFromSelectedTo = function(position) {
+    var clickedVertex = this.getVertexAt(position);
+    if (clickedVertex == this.selected) {
+        console.log('Tried to add self-edge!');
+    } else if (clickedVertex === null) {
+        console.log('Tried to add edge to nothing!')
+        this.deselect();
+    } else if (clickedVertex.hasNeighbour(this.selected)) {
+        console.log('Tried to add edge that already existed!')
+        this.selectVertex(clickedVertex);
+    } else {
+        console.log('Adding edge between vertices.');
+        this.addEdge(this.selected, clickedVertex);
+        this.selected.addLink(clickedVertex);
+        clickedVertex.addLink(this.selected);
+
+        this.selectVertex(clickedVertex);
+    }
+}
+
 // Return a random vertex from the graph.
 Graph.prototype.getRandomVertex = function() {
     var i = int(random(this.vertices.length - 1));
@@ -75,7 +95,7 @@ Graph.prototype.getRandomVertex = function() {
 Graph.prototype.addRandomVertexWithEdge = function() {
     var v1 = this.addVertex();
     var v2 = this.getRandomVertex();
-    this.edges.push(new Edge(v1, v2));
+    this.addEdge(v1, v2);
 
     // Add links to respective vertices.
     v1.addLink(v2);
@@ -112,37 +132,51 @@ Graph.prototype.addVertexToSelected = function() {
     return v;
 };
 
-Graph.prototype.select = function(position) {
+Graph.prototype.getVertexAt = function(position) {
     for (var i = 0; i < this.vertices.length; i++) {
         var v = this.vertices[i];
         var distance = p5.Vector.dist(position, v.position);
         if (distance < v.radius) {
-            this.selected = v;
-            console.log('Selected vertex ' + i);
-            if (this.parameters.selected != null) {
-                this.parameters.selected.remove();
-                delete this.parameters.selected;
-            }
-            this.parameters.selected = new Parameter(
-                "Radius", v.radius, 64, 'right', v, function(radius) {
-                    this.radius = radius;
-                }
-            );
-            return;
+            return v;
         }
     }
-    
-    // Remove selection when nothing was clicked.
-    this.selected = null;
-    if (this.parameters.selected != null) {
-        this.parameters.selected.remove();
-        delete this.parameters.selected;
+    return null;
+}
+
+Graph.prototype.select = function(position) {
+    var clickedVertex = this.getVertexAt(position);
+    if (clickedVertex !== null) {
+        this.selectVertex(clickedVertex);
+    } else {
+        // Remove selection when nothing was clicked.
+        this.deselect();
     }
 };
 
 Graph.prototype.hasSelected = function() {
     return this.selected !== null;
 };
+
+Graph.prototype.deselect = function() {
+    this.selected = null;
+    if (this.parameters.selected != null) {
+        this.parameters.selected.remove();
+        delete this.parameters.selected;
+    }
+}
+
+Graph.prototype.selectVertex = function(v) {
+    this.selected = v;
+    if (this.parameters.selected != null) {
+        this.parameters.selected.remove();
+        delete this.parameters.selected;
+    }
+    this.parameters.selected = new Parameter(
+        "Radius", v.radius, 64, 'right', v, function(radius) {
+            this.radius = radius;
+        }
+    );
+}
 
 Graph.prototype.dragTo = function(position) {
     if (this.selected !== null) {
