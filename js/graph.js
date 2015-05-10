@@ -63,6 +63,8 @@ Graph.prototype.addVertex = function() {
 // Add an edge between the two given vertices.
 Graph.prototype.addEdge = function(v1, v2) {
     this.edges.push(new Edge(v1, v2));
+    v1.addLink(v2);
+    v2.addLink(v1);
 };
 
 Graph.prototype.addEdgeFromSelectedTo = function(position) {
@@ -78,9 +80,6 @@ Graph.prototype.addEdgeFromSelectedTo = function(position) {
     } else {
         console.log('Adding edge between vertices.');
         this.addEdge(this.selected, clickedVertex);
-        this.selected.addLink(clickedVertex);
-        clickedVertex.addLink(this.selected);
-
         this.selectVertex(clickedVertex);
     }
 }
@@ -96,11 +95,6 @@ Graph.prototype.addRandomVertexWithEdge = function() {
     var v1 = this.addVertex();
     var v2 = this.getRandomVertex();
     this.addEdge(v1, v2);
-
-    // Add links to respective vertices.
-    v1.addLink(v2);
-    v2.addLink(v1);
-
     return v1;
 };
 
@@ -117,10 +111,6 @@ Graph.prototype.addVertexToClosest = function(position) {
     }
     this.vertices.push(v1);
     this.addEdge(v1, v2);
-
-    // Add links to respective vertices.
-    v1.addLink(v2);
-    v2.addLink(v1);
 
     return v1;
 };
