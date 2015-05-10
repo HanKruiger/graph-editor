@@ -70,15 +70,16 @@ Graph.prototype.addEdge = function(v1, v2) {
 Graph.prototype.addEdgeFromSelectedTo = function(position) {
     var clickedVertex = this.getVertexAt(position);
     if (clickedVertex == this.selected) {
-        console.log('Tried to add self-edge!');
+        // No self-edges: Do nothing
+        return;
     } else if (clickedVertex === null) {
-        console.log('Tried to add edge to nothing!')
+        // Clicked no vertex: Clear selection
         this.deselect();
     } else if (clickedVertex.hasNeighbour(this.selected)) {
-        console.log('Tried to add edge that already existed!')
+        // Edge already existed: Select the other vertex
         this.selectVertex(clickedVertex);
     } else {
-        console.log('Adding edge between vertices.');
+        // Add edge and select the other vertex
         this.addEdge(this.selected, clickedVertex);
         this.selectVertex(clickedVertex);
     }

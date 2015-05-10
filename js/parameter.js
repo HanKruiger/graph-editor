@@ -24,7 +24,6 @@ function Parameter(name, initialValue, maxValue, orientation, callbackObject, ca
     // Define the function that is to be called when the slider receives input.
     var me = this;
     this.slider.elt.oninput = function() {
-        console.log('value now: ' + me.value());
         callbackFunction.call(callbackObject, me.value());
         me.text.html(name + ': ' + me.value().toFixed(2));
     };

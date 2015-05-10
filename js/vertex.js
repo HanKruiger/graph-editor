@@ -22,7 +22,6 @@ Vertex.prototype.addLink = function(neighbour) {
 Vertex.prototype.hasNeighbour = function(v) {
     for (i = 0; i < this.neighbours.length; i++) {
         if (this.neighbours[i] === v) {
-            console.log('Found neighbour!');
             return true;
         }
     }
