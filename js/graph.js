@@ -5,41 +5,48 @@ function Graph(position) {
     this.selected = null;
 
     // Initial global parameters
-    this.stepSize = 1;
+    this.maxStepSize = 1;
     this.springConstant = 0.1;
     this.springLength = 40;
     this.repulsionConstant = 800;
+    this.touchRepulsionConstant = 80;
     this.gravityConstant = 1;
 
     // Parameter objects live in the parameters object, which is a simple container.
     this.parameters = {
-        stepSize:
+        maxStepSize:
             new Parameter(
-                "Step size", this.stepSize, 20, 'left', this, function(stepSize) {
-                    this.stepSize = stepSize;
+                "Maximum step size", this.maxStepSize, 20, 'left', this, function(maxStepSize) {
+                    this.maxStepSize = maxStepSize;
                 }
             ),
         springConstant:
             new Parameter(
-                "Spring constant", 0.1, 0.2, 'left', this, function(springConstant) {
+                "Spring constant", this.springConstant, 0.2, 'left', this, function(springConstant) {
                     this.springConstant = springConstant;
                 }
             ),
         springLength:
             new Parameter(
-                "Natural spring length", 40, 100, 'left', this, function(springLength) {
+                "Natural spring length", this.springLength, 100, 'left', this, function(springLength) {
                     this.springLength = springLength;
                 }
             ),
         repulsionConstant:
             new Parameter(
-                "Repulsion constant", 800, 2000, 'left', this, function(repulsionConstant) {
+                "Repulsion constant", this.repulsionConstant, 100, 'left', this, function(repulsionConstant) {
                     this.repulsionConstant = repulsionConstant;
+                }
+            ),
+        touchRepulsionConstant:
+            new Parameter(
+                "Touch repulsion constant", this.touchRepulsionConstant, 1000, 'left', this, function(touchRepulsionConstant) {
+                    this.touchRepulsionConstant = touchRepulsionConstant;
                 }
             ),
         gravityConstant:
             new Parameter(
-                "Gravity constant", 1, 5, 'left', this, function(gravityConstant) {
+                "Gravity constant", this.gravityConstant, 5, 'left', this, function(gravityConstant) {
                     this.gravityConstant = gravityConstant;
                 }
             )
@@ -154,15 +161,23 @@ Graph.prototype.update = function() {
     }
     for (i = 0; i < this.vertices.length; i++) {
         var v1 = this.vertices[i];
-        // Normal global repulsion
         for (var j = 0; j < this.vertices.length; j++) {
             if (j === i) {
                 continue;
             }
+            // Normal global repulsion
             var v2 = this.vertices[j];
             var distance = p5.Vector.dist(v2.position, v1.position);
             var force = p5.Vector.sub(v2.position, v1.position).setMag(this.repulsionConstant / (distance * distance));
             v2.applyForce(force);
+
+            if (distance < v1.radius + v2.radius) {
+                // Additional force to prevent overlapping vertices, inversely proportional to distance to the fourth power.
+                // This should blow up fast enough to prevent overlap, right?
+                // var touchForce = p5.Vector.sub(v2.position, v1.position).setMag(this.touchRepulsionConstant / (Math.pow(distance, 10)));
+                var touchForce = p5.Vector.sub(v2.position, v1.position).setMag(this.touchRepulsionConstant);
+                v2.applyForce(touchForce);
+            }
         }
 
         // Social gravity (simply scaled by number of connections)
@@ -170,7 +185,7 @@ Graph.prototype.update = function() {
         v1.applyForce(gravForce);
 
         // USE THE FORCE
-        this.vertices[i].update(this.stepSize);
+        this.vertices[i].update(this.maxStepSize);
     }
 
     if (this.hasSelected() && mouseIsPressed) {

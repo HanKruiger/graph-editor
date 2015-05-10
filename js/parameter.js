@@ -19,6 +19,7 @@ function Parameter(name, initialValue, maxValue, orientation, callbackObject, ca
 
     // Create the slider element and add it to the container.
     this.slider = createSlider(0, 100, initialValue * 100 / this.maxValue).parent(this.container);
+    this.slider.class('slider');
 
     // Define the function that is to be called when the slider receives input.
     var me = this;
