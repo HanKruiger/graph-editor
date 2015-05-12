@@ -164,8 +164,6 @@ Graph.prototype.getEdgeAt = function(position) {
         }
     }
     if (minDistance < 10 /* tolerance */) return closestEdge;
-
-    console.log('Couldn\'t find edge! Smallest distance: ' + minDistance);
     return null;
 }
 
@@ -182,7 +180,6 @@ Graph.prototype.select = function(position) {
         this.selectEdge(clickedEdge);
         return;
     }
-    console.log('Couldn\' find anything!');
 };
 
 Graph.prototype.hasSelected = function() {
@@ -264,9 +261,6 @@ Graph.prototype.update = function() {
     if (this.hasSelected() && mouseIsPressed) {
         this.selectedVertex.moveTo(createVector(mouseX, mouseY));
     }
-
-    // Increment timestep
-    this.t++;
 };
 
 // Display all vertices and edges.
