@@ -17,9 +17,9 @@ function setup() {
     graph.addVertex();
 
     // Add 9 more vertices to random other vertices.
-    for (var i = 0; i < 10; i++) {
-        graph.addRandomVertexWithEdge();
-    }
+    // for (var i = 0; i < 10; i++) {
+    //     graph.addRandomVertexWithEdge();
+    // }
 }
 
 // Processing draw function

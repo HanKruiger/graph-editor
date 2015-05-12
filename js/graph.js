@@ -2,15 +2,17 @@ function Graph(position) {
     this.origin = position.copy();
     this.vertices = [];
     this.edges = [];
-    this.selected = null;
+    this.selectedVertex = null;
+    this.selectedEdge = null;
 
     // Initial global parameters
     this.maxStepSize = 1;
     this.springConstant = 0.05;
-    this.springLength = 70;
+    this.naturalSpringLength = 70;
     this.repulsionConstant = 800;
     this.touchRepulsionConstant = 80;
     this.gravityConstant = 0.1;
+    this.noiseConstant = 1.5;
 
     // Parameter objects live in the parameters object, which is a simple container.
     this.parameters = {
@@ -22,14 +24,16 @@ function Graph(position) {
             ),
         springConstant:
             new Parameter(
-                "Spring constant", this.springConstant, 0.2, 'left', this, function(springConstant) {
-                    this.springConstant = springConstant;
+                "Spring constant", this.springConstant, 0.2, 'left', null, function(springConstant) {
+                    // Change the prototype spring constant
+                    Edge.prototype.springConstant = springConstant;
                 }
             ),
         springLength:
             new Parameter(
-                "Natural spring length", this.springLength, 100, 'left', this, function(springLength) {
-                    this.springLength = springLength;
+                "Natural spring length", this.naturalSpringLength, 100, 'left', null, function(naturalSpringLength) {
+                    // Change the prototype natural spring length
+                    Edge.prototype.naturalSpringLength = naturalSpringLength;
                 }
             ),
         repulsionConstant:
@@ -40,14 +44,20 @@ function Graph(position) {
             ),
         touchRepulsionConstant:
             new Parameter(
-                "Touch repulsion constant", this.touchRepulsionConstant, 1000, 'left', this, function(touchRepulsionConstant) {
+                "Touch repulsion constant", this.touchRepulsionConstant, 100, 'left', this, function(touchRepulsionConstant) {
                     this.touchRepulsionConstant = touchRepulsionConstant;
                 }
             ),
         gravityConstant:
             new Parameter(
-                "Gravity constant", this.gravityConstant, 5, 'left', this, function(gravityConstant) {
+                "Gravity constant", this.gravityConstant, 1, 'left', this, function(gravityConstant) {
                     this.gravityConstant = gravityConstant;
+                }
+            ),
+        noiseConstant:
+            new Parameter(
+                "Noise constant", this.noiseConstant, 5, 'left', this, function(noiseConstant) {
+                    this.noiseConstant = noiseConstant;
                 }
             )
     };
@@ -69,18 +79,18 @@ Graph.prototype.addEdge = function(v1, v2) {
 
 Graph.prototype.addEdgeFromSelectedTo = function(position) {
     var clickedVertex = this.getVertexAt(position);
-    if (clickedVertex == this.selected) {
+    if (clickedVertex == this.selectedVertex) {
         // No self-edges: Do nothing
         return;
     } else if (clickedVertex === null) {
         // Clicked no vertex: Clear selection
         this.deselect();
-    } else if (clickedVertex.hasNeighbour(this.selected)) {
+    } else if (clickedVertex.hasNeighbour(this.selectedVertex)) {
         // Edge already existed: Select the other vertex
         this.selectVertex(clickedVertex);
     } else {
         // Add edge and select the other vertex
-        this.addEdge(this.selected, clickedVertex);
+        this.addEdge(this.selectedVertex, clickedVertex);
         this.selectVertex(clickedVertex);
     }
 }
@@ -113,13 +123,20 @@ Graph.prototype.addVertexToClosest = function(position) {
     this.vertices.push(v1);
     this.addEdge(v1, v2);
 
+    // Remove selected vertex
+    this.deselect();
+
     return v1;
 };
 
 Graph.prototype.addVertexToSelected = function() {
-    var v = new Vertex(this.selected.position);
+    var v = new Vertex(this.selectedVertex.position);
     this.vertices.push(v);
-    this.addEdge(v, this.selected);
+    this.addEdge(v, this.selectedVertex);
+
+    // Remove selected vertex
+    this.deselect();
+
     return v;
 };
 
@@ -134,34 +151,55 @@ Graph.prototype.getVertexAt = function(position) {
     return null;
 }
 
+Graph.prototype.getEdgeAt = function(position) {
+    if (this.edges.length == 0) return null;
+    var closestEdge = this.edges[0];
+    var minDistance = closestEdge.distanceTo(position);
+    for (var i = 1; i < this.edges.length; i++) {
+        var e = this.edges[i];
+        var distance = e.distanceTo(position);
+        if (distance < minDistance) {
+            minDistance = distance;
+            closestEdge = e;
+        }
+    }
+    if (minDistance < 10 /* tolerance */) return closestEdge;
+
+    console.log('Couldn\'t find edge! Smallest distance: ' + minDistance);
+    return null;
+}
+
 Graph.prototype.select = function(position) {
+    // First, deselect everything. To prevent unwanted behaviour.
+    this.deselect();
     var clickedVertex = this.getVertexAt(position);
     if (clickedVertex !== null) {
         this.selectVertex(clickedVertex);
-    } else {
-        // Remove selection when nothing was clicked.
-        this.deselect();
+        return;
     }
+    var clickedEdge = this.getEdgeAt(position);
+    if (clickedEdge !== null) {
+        this.selectEdge(clickedEdge);
+        return;
+    }
+    console.log('Couldn\' find anything!');
 };
 
 Graph.prototype.hasSelected = function() {
-    return this.selected !== null;
+    return this.selectedVertex !== null;
 };
 
 Graph.prototype.deselect = function() {
-    this.selected = null;
+    this.selectedVertex = null;
     if (this.parameters.selected != null) {
         this.parameters.selected.remove();
         delete this.parameters.selected;
     }
+    this.selectedEdge = null;
 }
 
 Graph.prototype.selectVertex = function(v) {
-    this.selected = v;
-    if (this.parameters.selected != null) {
-        this.parameters.selected.remove();
-        delete this.parameters.selected;
-    }
+    this.selectedVertex = v;
     this.parameters.selected = new Parameter(
         "Radius", v.radius, 64, 'right', v, function(radius) {
             this.radius = radius;
@@ -169,9 +207,18 @@ Graph.prototype.selectVertex = function(v) {
     );
 }
 
+Graph.prototype.selectEdge = function(e) {
+    this.selectedEdge = e;
+    this.parameters.selected = new Parameter(
+        "Natural spring length", e.naturalSpringLength, 150, 'right', e, function(l) {
+            this.naturalSpringLength = l;
+        }
+    );
+};
+
 Graph.prototype.dragTo = function(position) {
-    if (this.selected !== null) {
-        this.selected.moveTo(position);
+    if (this.selectedVertex !== null) {
+        this.selectedVertex.moveTo(position);
     }
 }
 
@@ -182,7 +229,7 @@ Graph.prototype.moveGravity = function(position) {
 // Update all vertices and edges.
 Graph.prototype.update = function() {
     for (i = 0; i < this.edges.length; i++) {
-        this.edges[i].update(this.springLength, this.springConstant);
+        this.edges[i].update();
     }
     for (i = 0; i < this.vertices.length; i++) {
         var v1 = this.vertices[i];
@@ -197,37 +244,49 @@ Graph.prototype.update = function() {
             v2.applyForce(force);
 
             if (distance < v1.radius + v2.radius) {
-                // Additional force to prevent overlapping vertices, inversely proportional to distance to the fourth power.
-                // This should blow up fast enough to prevent overlap, right?
-                // var touchForce = p5.Vector.sub(v2.position, v1.position).setMag(this.touchRepulsionConstant / (Math.pow(distance, 10)));
+                // Additional force to prevent overlapping vertices, which is only active when the vertices touch.
                 var touchForce = p5.Vector.sub(v2.position, v1.position).setMag(this.touchRepulsionConstant);
                 v2.applyForce(touchForce);
             }
         }
 
         // Social gravity (simply scaled by number of connections)
-        var gravForce = p5.Vector.sub(this.origin, v1.position).setMag(this.gravityConstant * v1.neighbours.length);
+        var gravForce = p5.Vector.sub(this.origin, v1.position).setMag(this.gravityConstant * (v1.neighbours.length + 1));
         v1.applyForce(gravForce);
 
+        // Random noise force, for float-like effect
+        v1.applyNoiseForce(this.noiseConstant);
+
         // USE THE FORCE
-        this.vertices[i].update(this.maxStepSize);
+        v1.update(this.maxStepSize);
     }
 
     if (this.hasSelected() && mouseIsPressed) {
-        this.selected.moveTo(createVector(mouseX, mouseY));
+        this.selectedVertex.moveTo(createVector(mouseX, mouseY));
     }
+
+    // Increment timestep
+    this.t++;
 };
 
 // Display all vertices and edges.
 Graph.prototype.display = function() {
-    stroke(0);
-    strokeWeight(2);
     for (var i = 0; i < this.edges.length; i++) {
+        if (this.selectedEdge === this.edges[i]) {
+            // TODO: Needs more fancy
+            strokeWeight(6);
+            stroke(255);
+        } else {
+            strokeWeight(2);
+            stroke(0);
+        }
         this.edges[i].display();
     }
     
+    strokeWeight(2);
+    stroke(0);
     for (i = 0; i < this.vertices.length; i++) {
-        if (this.selected === this.vertices[i]) {
+        if (this.selectedVertex === this.vertices[i]) {
             fill(255);
         } else {
             fill(128);
