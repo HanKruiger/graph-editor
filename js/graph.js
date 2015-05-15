@@ -63,20 +63,22 @@ function Graph(position) {
     };
 }
 
-// Add a vertex to the graph. Assign it a random position on the screen.
-Graph.prototype.addVertex = function() {
-    var vertex = new Vertex(createVector(random(width), random(height)));
+// Add a vertex to the graph with initial position 'position'.
+Graph.prototype.addVertex = function(position) {
+    var vertex = new Vertex(position);
     this.vertices.push(vertex);
     return vertex;
 };
 
 // Add an edge between the two given vertices.
 Graph.prototype.addEdge = function(v1, v2) {
-    this.edges.push(new Edge(v1, v2));
-    v1.addLink(v2);
-    v2.addLink(v1);
+    var edge = new Edge(v1, v2);
+    this.edges.push(edge);
+    v1.addLink(edge);
+    v2.addLink(edge);
 };
 
+// Add an edge from the selected vertex to the clicked vertex
 Graph.prototype.addEdgeFromSelectedTo = function(position) {
     var clickedVertex = this.getVertexAt(position);
     if (clickedVertex == this.selectedVertex) {
@@ -95,42 +97,9 @@ Graph.prototype.addEdgeFromSelectedTo = function(position) {
     }
 }
 
-// Return a random vertex from the graph.
-Graph.prototype.getRandomVertex = function() {
-    var i = int(random(this.vertices.length - 1));
-    return this.vertices[i];
-};
-
-// Adds a vertex to a random other vertex in the graph, and an edge representing this relation.
-Graph.prototype.addRandomVertexWithEdge = function() {
-    var v1 = this.addVertex();
-    var v2 = this.getRandomVertex();
-    this.addEdge(v1, v2);
-    return v1;
-};
-
-Graph.prototype.addVertexToClosest = function(position) {
-    var v1 = new Vertex(position);
-    var v2 = this.vertices[0];
-    var distance = p5.Vector.dist(v1.position, v2.position);
-    for (var i = 1; i < this.vertices.length; i++) {
-        var newDistance = p5.Vector.dist(v1.position, this.vertices[i].position);
-        if (newDistance < distance) {
-            v2 = this.vertices[i];
-            distance = newDistance;
-        }
-    }
-    this.vertices.push(v1);
-    this.addEdge(v1, v2);
-
-    // Remove selected vertex
-    this.deselect();
-
-    return v1;
-};
-
-Graph.prototype.addVertexToSelected = function() {
-    var v = new Vertex(this.selectedVertex.position);
+// Adds a vertex with a connection to the selected vertex.
+Graph.prototype.addVertexToSelected = function(position) {
+    var v = new Vertex(position);
     this.vertices.push(v);
     this.addEdge(v, this.selectedVertex);
 
@@ -140,6 +109,7 @@ Graph.prototype.addVertexToSelected = function() {
     return v;
 };
 
+// Returns a vertex (if any) at position 'position'
 Graph.prototype.getVertexAt = function(position) {
     for (var i = 0; i < this.vertices.length; i++) {
         var v = this.vertices[i];
@@ -151,6 +121,7 @@ Graph.prototype.getVertexAt = function(position) {
     return null;
 }
 
+// Returns an edge (if any) at position 'position'
 Graph.prototype.getEdgeAt = function(position) {
     if (this.edges.length == 0) return null;
     var closestEdge = this.edges[0];
@@ -167,6 +138,7 @@ Graph.prototype.getEdgeAt = function(position) {
     return null;
 }
 
+// Select the entity (if any) that is clicked.
 Graph.prototype.select = function(position) {
     // First, deselect everything. To prevent unwanted behaviour.
     this.deselect();
@@ -183,19 +155,30 @@ Graph.prototype.select = function(position) {
 };
 
 Graph.prototype.hasSelected = function() {
+    return this.hasSelectedVertex() || this.hasSelectedEdge();
+};
+
+Graph.prototype.hasSelectedVertex = function() {
     return this.selectedVertex !== null;
 };
 
+Graph.prototype.hasSelectedEdge = function() {
+    return this.selectedEdge !== null;
+};
+
+// Remove selection
 Graph.prototype.deselect = function() {
     this.selectedVertex = null;
+    this.selectedEdge = null;
     if (this.parameters.selected != null) {
         this.parameters.selected.remove();
         delete this.parameters.selected;
     }
-    this.selectedEdge = null;
 }
 
+// Select vertex 'v'.
 Graph.prototype.selectVertex = function(v) {
+    this.deselect();
     this.selectedVertex = v;
     this.parameters.selected = new Parameter(
         "Radius", v.radius, 64, 'right', v, function(radius) {
@@ -204,7 +187,9 @@ Graph.prototype.selectVertex = function(v) {
     );
 }
 
+// Select edge 'e'.
 Graph.prototype.selectEdge = function(e) {
+    this.deselect();
     this.selectedEdge = e;
     this.parameters.selected = new Parameter(
         "Natural spring length", e.naturalSpringLength, 150, 'right', e, function(l) {
@@ -212,6 +197,44 @@ Graph.prototype.selectEdge = function(e) {
         }
     );
 };
+
+// Remove the selected entity, and clean up all its links/edges.
+Graph.prototype.removeSelected = function() {
+    var i = this.vertices.indexOf(this.selectedVertex);
+    if (i >= 0) {
+        var removeMe = this.vertices[i];
+        var edgesToRemove = removeMe.links;
+        // Loop over edges connected to vertex that is being removed.
+        for (var j = 0; j < edgesToRemove.length; j++) {
+            var k = this.edges.indexOf(edgesToRemove[j]);
+            if (k >= 0) {
+                // Remove edge from array
+                this.edges.splice(k, 1);
+            } else {
+                console.error("Couldn't find edge that I should have been able to find!");
+            }
+        }
+        // Removes links from its neighbours.
+        removeMe.remove();
+
+        // Remove vertex from array
+        this.vertices.splice(i, 1);
+
+        this.deselect();
+        return;
+    }
+    // There was no selected vertex, so look for a selected edge.
+    i = this.edges.indexOf(this.selectedEdge);
+    if (i >= 0) {
+        var removeMe = this.edges[i];
+        removeMe.remove();
+        this.edges.splice(i, 1);
+
+        this.deselect();
+        return;
+    }
+    console.error("Couldn't find selected entity to remove!");
+}
 
 Graph.prototype.dragTo = function(position) {
     if (this.selectedVertex !== null) {
@@ -248,7 +271,7 @@ Graph.prototype.update = function() {
         }
 
         // Social gravity (simply scaled by number of connections)
-        var gravForce = p5.Vector.sub(this.origin, v1.position).setMag(this.gravityConstant * (v1.neighbours.length + 1));
+        var gravForce = p5.Vector.sub(this.origin, v1.position).setMag(this.gravityConstant * (v1.links.length + 1));
         v1.applyForce(gravForce);
 
         // Random noise force, for float-like effect
@@ -258,7 +281,7 @@ Graph.prototype.update = function() {
         v1.update(this.maxStepSize);
     }
 
-    if (this.hasSelected() && mouseIsPressed) {
+    if (this.hasSelectedVertex() && mouseIsPressed) {
         this.selectedVertex.moveTo(createVector(mouseX, mouseY));
     }
 };
@@ -266,25 +289,10 @@ Graph.prototype.update = function() {
 // Display all vertices and edges.
 Graph.prototype.display = function() {
     for (var i = 0; i < this.edges.length; i++) {
-        if (this.selectedEdge === this.edges[i]) {
-            // TODO: Needs more fancy
-            strokeWeight(6);
-            stroke(255);
-        } else {
-            strokeWeight(2);
-            stroke(0);
-        }
-        this.edges[i].display();
+        this.edges[i].display(this.selectedEdge === this.edges[i]);
     }
-    
-    strokeWeight(2);
-    stroke(0);
+
     for (i = 0; i < this.vertices.length; i++) {
-        if (this.selectedVertex === this.vertices[i]) {
-            fill(255);
-        } else {
-            fill(128);
-        }
-        this.vertices[i].display();
+        this.vertices[i].display(this.selectedVertex === this.vertices[i]);
     }
 };

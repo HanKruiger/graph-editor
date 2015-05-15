@@ -13,18 +13,13 @@ function setup() {
 
     graph = new Graph(createVector(width / 2, height / 2));
     
-    // Add a vertex in a random position.    
-    graph.addVertex();
-
-    // Add 9 more vertices to random other vertices.
-    // for (var i = 0; i < 10; i++) {
-    //     graph.addRandomVertexWithEdge();
-    // }
+    // Add a vertex in the center.    
+    graph.addVertex(createVector(width / 2, height / 2));
 }
 
 // Processing draw function
 function draw() {
-    // A little hack to make mouseIsPressed true only when the mouse it pressed in the canvas
+    // Make mouseIsPressed true only when the mouse is pressed in the canvas
     mouseIsPressed = mouseIsPressed && mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height;
 
     if (running) {
@@ -38,25 +33,32 @@ function draw() {
 function keyTyped() {
     if (key === 'p') {
         running = !running;
+    } else if (key == 'r' && graph.hasSelected()) {
+        graph.removeSelected();
     }
     return false; // prevent any default behavior
 }
 
 // Called when the canvas is pressed.
 function canvasMousePressed() {
+    var mousePosition = createVector(mouseX, mouseY);
     if (keyIsDown(71) || keyIsDown(103)) { // 'g' or 'G'
-        graph.moveGravity(createVector(mouseX, mouseY));
+        // Move the origin of gravitational attraction to the mouse position
+        graph.moveGravity(mousePosition);
     } else if (keyIsDown(86) || keyIsDown(118)) { // 'v' or 'V'
-        if (!graph.hasSelected()) {
-            graph.addVertexToClosest(createVector(mouseX, mouseY));
+        if (graph.hasSelectedVertex()) {
+            // Add a vertex that is connected to the selected vertex. 
+            graph.addVertexToSelected(mousePosition);
         } else {
-            graph.addVertexToSelected();
+            // Add a vertex without an edge
+            graph.addVertex(mousePosition);
         }
     } else if (keyIsDown(69) || keyIsDown(101)) { // 'e' or 'E'
-        if (graph.hasSelected()) {
-            graph.addEdgeFromSelectedTo(createVector(mouseX, mouseY));
+        if (graph.hasSelectedVertex()) {
+            // Add an edge from the selected vertex to the clicked (if any) vertex.
+            graph.addEdgeFromSelectedTo(mousePosition);
         }
     } else {
-        graph.select(createVector(mouseX, mouseY));
+        graph.select(mousePosition);
     }
 }

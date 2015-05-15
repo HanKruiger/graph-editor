@@ -2,7 +2,8 @@ function Vertex(position) {
     this.position = position.copy();
     this.force = createVector(0, 0);
     this.radius = constrain(randomGaussian(24, 12), 16, 32);
-    this.neighbours = [];
+    this.links = [];
+    this.label = '';
 
     // Seed for Perlin noise
     this.seed = random(0, 424242);
@@ -18,17 +19,35 @@ Vertex.prototype.applyForce = function(force) {
 };
 
 // Add another vertex to the list of neighbours
-Vertex.prototype.addLink = function(neighbour) {
-    this.neighbours.push(neighbour);
+Vertex.prototype.addLink = function(link) {
+    this.links.push(link);
 };
 
+// Removes 'link' from the list of links.
+Vertex.prototype.removeLink = function(link) {
+    var index = this.links.indexOf(link);
+    if (index >= 0) {
+        this.links.splice(index, 1);
+    } else {
+        console.error("Couldn't remove link from vertex!");
+    }
+}
+
+// Returns true iff 'v' is a neighbout of this vertex.
 Vertex.prototype.hasNeighbour = function(v) {
-    for (i = 0; i < this.neighbours.length; i++) {
-        if (this.neighbours[i] === v) {
+    for (i = 0; i < this.links.length; i++) {
+        if (this.links[i].v1 === v || this.links[i].v2 === v) {
             return true;
         }
     }
     return false;
+}
+
+// Traverses to the vertex's neighbours, and removes the links going to this vertex.
+Vertex.prototype.remove = function() {
+    for (i = 0; i < this.links.length; i++) {
+        this.links[i].traverseFrom(this).removeLink(this.links[i]);
+    }
 }
 
 Vertex.prototype.applyNoiseForce = function(noiseConstant) {
@@ -46,6 +65,22 @@ Vertex.prototype.update = function(maxStepSize) {
 };
 
 // Method to display
-Vertex.prototype.display = function() {
+Vertex.prototype.display = function(selected) {
+    if (selected) {
+        stroke(0);
+        fill(255);
+        strokeWeight(4);
+    } else {
+        stroke(0);
+        fill(128);
+        strokeWeight(2);
+    }
     ellipse(this.position.x, this.position.y, 2 * this.radius, 2 * this.radius);
+
+    stroke(0);
+    fill(128);
+    strokeWeight(1);
+    textAlign(CENTER);
+    textFont("Courier");
+    text(this.label, this.position.x, this.position.y);
 };
