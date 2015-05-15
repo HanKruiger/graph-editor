@@ -1,4 +1,4 @@
-function Parameter(name, initialValue, maxValue, orientation, callbackObject, callbackFunction) {
+function Slider(name, initialValue, maxValue, orientation, callbackObject, callbackFunction) {
     this.name = name;
     this.maxValue = maxValue;
 
@@ -11,7 +11,7 @@ function Parameter(name, initialValue, maxValue, orientation, callbackObject, ca
     } else if (orientation === 'right') {
         this.container.parent('parameters_right');
     } else {
-        console.error("'orientation' must be one of the values defined in Parameter.orientationEnum.");
+        console.error("'orientation' must be either 'left' or 'right'.");
     }
 
     // Create the text element and add it to the container.
@@ -30,11 +30,11 @@ function Parameter(name, initialValue, maxValue, orientation, callbackObject, ca
 }
 
 // Retrieve the value of the parameter
-Parameter.prototype.value = function() {
+Slider.prototype.value = function() {
     return this.slider.value() * this.maxValue / 100.0;
 };
 
-// Removes the parameter's container and all child elements.
-Parameter.prototype.remove = function() {
+// Removes the slider's container and all child elements.
+Slider.prototype.remove = function() {
     this.container.remove();
 };

@@ -14,48 +14,48 @@ function Graph(position) {
     this.gravityConstant = 0.1;
     this.noiseConstant = 1.5;
 
-    // Parameter objects live in the parameters object, which is a simple container.
-    this.parameters = [
-        new Parameter(
+    // Slider objects live here. And perhaps other setting setters.
+    this.settings = [
+        new Slider(
             "Maximum step size", this.maxStepSize, 20, 'left', this, function(maxStepSize) {
                 this.maxStepSize = maxStepSize;
             }
         ),
-        new Parameter(
+        new Slider(
             "Spring constant", this.springConstant, 0.2, 'left', null, function(springConstant) {
                 // Change the prototype spring constant
                 Edge.prototype.springConstant = springConstant;
             }
         ),
-        new Parameter(
+        new Slider(
             "Natural spring length", this.naturalSpringLength, 100, 'left', null, function(naturalSpringLength) {
                 // Change the prototype natural spring length
                 Edge.prototype.naturalSpringLength = naturalSpringLength;
             }
         ),
-        new Parameter(
+        new Slider(
             "Repulsion constant", this.repulsionConstant, 1000, 'left', this, function(repulsionConstant) {
                 this.repulsionConstant = repulsionConstant;
             }
         ),
-        new Parameter(
+        new Slider(
             "Touch repulsion constant", this.touchRepulsionConstant, 100, 'left', this, function(touchRepulsionConstant) {
                 this.touchRepulsionConstant = touchRepulsionConstant;
             }
         ),
-        new Parameter(
+        new Slider(
             "Gravity constant", this.gravityConstant, 1, 'left', this, function(gravityConstant) {
                 this.gravityConstant = gravityConstant;
             }
         ),
-        new Parameter(
+        new Slider(
             "Noise constant", this.noiseConstant, 5, 'left', this, function(noiseConstant) {
                 this.noiseConstant = noiseConstant;
             }
         )
     ];
 
-    this.selectionParameters = [];
+    this.selectionSettings = [];
 }
 
 // Add a vertex to the graph with initial position 'position'.
@@ -166,17 +166,17 @@ Graph.prototype.deselect = function() {
     this.selectedVertex = null;
     this.selectedEdge = null;
     // Remove sliders made for the selection.
-    for (var i = 0; i < this.selectionParameters.length; i++) {
-        this.selectionParameters[i].remove();
+    for (var i = 0; i < this.selectionSettings.length; i++) {
+        this.selectionSettings[i].remove();
     }
-    this.selectionParameters = [];
+    this.selectionSettings = [];
 }
 
 // Select vertex 'v'.
 Graph.prototype.selectVertex = function(v) {
     this.deselect();
     this.selectedVertex = v;
-    this.selectionParameters.push(new Parameter(
+    this.selectionSettings.push(new Slider(
         "Radius", v.radius, 64, 'right', v, function(radius) {
             this.radius = radius;
         }
@@ -187,12 +187,12 @@ Graph.prototype.selectVertex = function(v) {
 Graph.prototype.selectEdge = function(e) {
     this.deselect();
     this.selectedEdge = e;
-    this.selectionParameters.push(
-        new Parameter(
+    this.selectionSettings.push(
+        new Slider(
             "Natural spring length", e.naturalSpringLength, 150, 'right', e, function(naturalSpringLength) {
                 this.naturalSpringLength = naturalSpringLength;
             }
-        ), new Parameter(
+        ), new Slider(
             "Spring constant", e.springConstant, 2, 'right', e, function(springConstant) {
                 this.springConstant = springConstant;
             }
