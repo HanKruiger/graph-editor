@@ -1,5 +1,4 @@
 Edge.prototype.naturalSpringLength = 70;
-Edge.prototype.weight = 1;
 Edge.prototype.springConstant = 0.05;
 
 function Edge(v1, v2) {

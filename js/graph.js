@@ -15,52 +15,47 @@ function Graph(position) {
     this.noiseConstant = 1.5;
 
     // Parameter objects live in the parameters object, which is a simple container.
-    this.parameters = {
-        maxStepSize:
-            new Parameter(
-                "Maximum step size", this.maxStepSize, 20, 'left', this, function(maxStepSize) {
-                    this.maxStepSize = maxStepSize;
-                }
-            ),
-        springConstant:
-            new Parameter(
-                "Spring constant", this.springConstant, 0.2, 'left', null, function(springConstant) {
-                    // Change the prototype spring constant
-                    Edge.prototype.springConstant = springConstant;
-                }
-            ),
-        springLength:
-            new Parameter(
-                "Natural spring length", this.naturalSpringLength, 100, 'left', null, function(naturalSpringLength) {
-                    // Change the prototype natural spring length
-                    Edge.prototype.naturalSpringLength = naturalSpringLength;
-                }
-            ),
-        repulsionConstant:
-            new Parameter(
-                "Repulsion constant", this.repulsionConstant, 1000, 'left', this, function(repulsionConstant) {
-                    this.repulsionConstant = repulsionConstant;
-                }
-            ),
-        touchRepulsionConstant:
-            new Parameter(
-                "Touch repulsion constant", this.touchRepulsionConstant, 100, 'left', this, function(touchRepulsionConstant) {
-                    this.touchRepulsionConstant = touchRepulsionConstant;
-                }
-            ),
-        gravityConstant:
-            new Parameter(
-                "Gravity constant", this.gravityConstant, 1, 'left', this, function(gravityConstant) {
-                    this.gravityConstant = gravityConstant;
-                }
-            ),
-        noiseConstant:
-            new Parameter(
-                "Noise constant", this.noiseConstant, 5, 'left', this, function(noiseConstant) {
-                    this.noiseConstant = noiseConstant;
-                }
-            )
-    };
+    this.parameters = [
+        new Parameter(
+            "Maximum step size", this.maxStepSize, 20, 'left', this, function(maxStepSize) {
+                this.maxStepSize = maxStepSize;
+            }
+        ),
+        new Parameter(
+            "Spring constant", this.springConstant, 0.2, 'left', null, function(springConstant) {
+                // Change the prototype spring constant
+                Edge.prototype.springConstant = springConstant;
+            }
+        ),
+        new Parameter(
+            "Natural spring length", this.naturalSpringLength, 100, 'left', null, function(naturalSpringLength) {
+                // Change the prototype natural spring length
+                Edge.prototype.naturalSpringLength = naturalSpringLength;
+            }
+        ),
+        new Parameter(
+            "Repulsion constant", this.repulsionConstant, 1000, 'left', this, function(repulsionConstant) {
+                this.repulsionConstant = repulsionConstant;
+            }
+        ),
+        new Parameter(
+            "Touch repulsion constant", this.touchRepulsionConstant, 100, 'left', this, function(touchRepulsionConstant) {
+                this.touchRepulsionConstant = touchRepulsionConstant;
+            }
+        ),
+        new Parameter(
+            "Gravity constant", this.gravityConstant, 1, 'left', this, function(gravityConstant) {
+                this.gravityConstant = gravityConstant;
+            }
+        ),
+        new Parameter(
+            "Noise constant", this.noiseConstant, 5, 'left', this, function(noiseConstant) {
+                this.noiseConstant = noiseConstant;
+            }
+        )
+    ];
+
+    this.selectionParameters = [];
 }
 
 // Add a vertex to the graph with initial position 'position'.
@@ -170,31 +165,38 @@ Graph.prototype.hasSelectedEdge = function() {
 Graph.prototype.deselect = function() {
     this.selectedVertex = null;
     this.selectedEdge = null;
-    if (this.parameters.selected != null) {
-        this.parameters.selected.remove();
-        delete this.parameters.selected;
+    // Remove sliders made for the selection.
+    for (var i = 0; i < this.selectionParameters.length; i++) {
+        this.selectionParameters[i].remove();
     }
+    this.selectionParameters = [];
 }
 
 // Select vertex 'v'.
 Graph.prototype.selectVertex = function(v) {
     this.deselect();
     this.selectedVertex = v;
-    this.parameters.selected = new Parameter(
+    this.selectionParameters.push(new Parameter(
         "Radius", v.radius, 64, 'right', v, function(radius) {
             this.radius = radius;
         }
-    );
+    ));
 }
 
 // Select edge 'e'.
 Graph.prototype.selectEdge = function(e) {
     this.deselect();
     this.selectedEdge = e;
-    this.parameters.selected = new Parameter(
-        "Natural spring length", e.naturalSpringLength, 150, 'right', e, function(l) {
-            this.naturalSpringLength = l;
-        }
+    this.selectionParameters.push(
+        new Parameter(
+            "Natural spring length", e.naturalSpringLength, 150, 'right', e, function(naturalSpringLength) {
+                this.naturalSpringLength = naturalSpringLength;
+            }
+        ), new Parameter(
+            "Spring constant", e.springConstant, 2, 'right', e, function(springConstant) {
+                this.springConstant = springConstant;
+            }
+        )
     );
 };
 
