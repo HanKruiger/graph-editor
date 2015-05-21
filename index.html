@@ -1,20 +1,26 @@
 <html>
 
 <head>
-    <script language="javascript" type="text/javascript" src="js/lib/p5.js"></script>
-    <script language="javascript" type="text/javascript" src="js/lib/p5.dom.js"></script>
+    <script language="javascript" type="text/javascript" src="js/lib/jquery-2.1.4.min.js"></script>
+    <script language="javascript" type="text/javascript" src="js/lib/perlin.js"></script>
+    <script language="javascript" type="text/javascript" src="js/utils.js"></script>
+    <script language="javascript" type="text/javascript" src="js/main.js"></script>
+    <script language="javascript" type="text/javascript" src="js/graphsapp.js"></script>
+    <script language="javascript" type="text/javascript" src="js/inputhandler.js"></script>
+    <script language="javascript" type="text/javascript" src="js/graph.js"></script>
     <script language="javascript" type="text/javascript" src="js/vertex.js"></script>
     <script language="javascript" type="text/javascript" src="js/edge.js"></script>
-    <script language="javascript" type="text/javascript" src="js/graph.js"></script>
     <script language="javascript" type="text/javascript" src="js/slider.js"></script>
-    <script language="javascript" type="text/javascript" src="js/main.js"></script>
+    <script language="javascript" type="text/javascript" src="js/vec2.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
     <div id="wrapper">
         <span id="parameters_left"></span>
-        <span id="canvas_container"></span>
+        <span id="canvas_container">
+            <canvas id="the_canvas" width="80%" height="720"></canvas>
+        </span>
         <span id="parameters_right"></span>
     </div>
     <ul>
@@ -22,7 +28,6 @@
         <li>Click vertices to select them.</li>
         <li>Select a vertex, hold <b>e</b> and click another vertex to add an edge.</li>
         <li>Hold <b>g</b> and click somewhere to move center of gravity.</li>
-        <li>Press <b>p</b> to pause.</li>
         <li>Move vertices by dragging them around.</li>
         <li>To remove a vertex or edge, select it and press <b>r</b>.</li>
     </ul>

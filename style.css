@@ -4,6 +4,10 @@ body {
     font-size: 14px;
 }
 
+canvas {
+    border: 1px solid black;
+}
+
 .slider {
     width: 100%;
 }

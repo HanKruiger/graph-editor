@@ -1,40 +1,74 @@
-function Slider(name, initialValue, maxValue, orientation, callbackObject, callbackFunction) {
+/**
+ * Creates a Slider object and adds it to the DOM.
+ *
+ * @constructor
+ * @param {String}   name         The name of the parameter that this slider
+ *                                edits
+ * @param {number}   initialValue Initial value of the parameter.
+ * @param {number}   minValue     Minimum value of the parameter.
+ * @param {number}   maxValue     Maximum value of the parameter.
+ * @param {String}   orientation  String indicating the orientation. Must be
+ *                                either 'left' or 'right' at this moment.
+ * @param {Object}   thisObj      The 'this' context of the callback function.
+ * @param {Function} callback     The callback function that is called when the
+ *                                slide receives input.
+ */
+function Slider(name, initialValue, minValue, maxValue, orientation, thisObj, callback) {
     this.name = name;
     this.maxValue = maxValue;
+    this.minValue = minValue;
+    this.steps = 100;
+    this.precision = 2;
 
     // Create the container in which the text and slider will be placed.
-    this.container = createDiv('').class('parameter');
+    this.container = $(document.createElement('div'))
+        .addClass('parameter');
 
-    // Place the container in the right parameter container.
+    // Place the container in the proper parameter container.
     if (orientation === 'left') {
-        this.container.parent('parameters_left');
+        this.container.appendTo('#parameters_left');
     } else if (orientation === 'right') {
-        this.container.parent('parameters_right');
+        this.container.appendTo('#parameters_right');
     } else {
         console.error("'orientation' must be either 'left' or 'right'.");
     }
 
     // Create the text element and add it to the container.
-    this.text = createP(name + ': ' + initialValue.toFixed(2)).parent(this.container);
+    this.text = $(document.createElement('p'))
+        .text(name + ': ' + initialValue.toFixed(this.precision))
+        .appendTo(this.container);
 
-    // Create the slider element and add it to the container.
-    this.slider = createSlider(0, 100, initialValue * 100 / this.maxValue).parent(this.container);
-    this.slider.class('slider');
-
-    // Define the function that is to be called when the slider receives input.
     var me = this;
-    this.slider.elt.oninput = function() {
-        callbackFunction.call(callbackObject, me.value());
-        me.text.html(name + ': ' + me.value().toFixed(2));
-    };
+    // Create the slider element and add it to the container.
+    this.slider = $(document.createElement('input'))
+        .addClass('slider')
+        .attr('type', 'range')
+        .attr('min', 0)
+        .attr('max', this.steps)
+        // Value in slider range
+        .val(this.steps * (initialValue - minValue) / (maxValue - minValue))
+        .appendTo(this.container)
+        // Define the function that is to be called when the slider receives input.
+        .on('input', function() {
+            callback.call(thisObj, me.value());
+            me.text.text(name + ': ' + me.value().toFixed(me.precision));
+        });
 }
 
-// Retrieve the value of the parameter
+/**
+ * Returns the value of the slider.
+ * 
+ * @return {number} Value of the slider
+ */
 Slider.prototype.value = function() {
-    return this.slider.value() * this.maxValue / 100.0;
+    return this.minValue + this.slider.val() * (this.maxValue - this.minValue) / this.steps;
 };
 
-// Removes the slider's container and all child elements.
+/**
+ * Removes the slider's container and all child elements.
+ * 
+ * @return {jQuery} The removed jQuery object. 
+ */
 Slider.prototype.remove = function() {
-    this.container.remove();
+    return this.container.remove();
 };
