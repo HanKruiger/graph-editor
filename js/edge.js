@@ -1,9 +1,10 @@
 Edge.prototype.naturalSpringLength = 70;
 Edge.prototype.springConstant = 0.05;
 
-function Edge(v1, v2) {
+function Edge(v1, v2, graph) {
     this.v1 = v1;
     this.v2 = v2;
+    this.graph = graph;
     this.selected = false;
 }
 
@@ -12,12 +13,6 @@ Edge.prototype.traverseFrom = function(v) {
     if (v === this.v1) return this.v2;
     if (v === this.v2) return this.v1;
     console.error("Could not traverse!");
-};
-
-// Removes links to this edge from both vertices.
-Edge.prototype.remove = function() {
-    this.v1.removeLink(this);
-    this.v2.removeLink(this);
 };
 
 // Update the vertices that this edge connects.
@@ -35,10 +30,22 @@ Edge.prototype.update = function() {
 
 Edge.prototype.select = function() {
     this.selected = true;
+    this.naturalSpringLengthSlider = new Slider(
+        "Natural spring length", this.naturalSpringLength, 0, 150, 'right', this, function(naturalSpringLength) {
+            this.naturalSpringLength = naturalSpringLength;
+        }
+    );
+    this.springConstantSlider = new Slider(
+        "Spring constant", this.springConstant, 0, 2, 'right', this, function(springConstant) {
+            this.springConstant = springConstant;
+        }
+    );
 };
 
 Edge.prototype.deselect = function() {
     this.selected = false;
+    this.naturalSpringLengthSlider.remove();
+    this.springConstantSlider.remove();
 };
 
 // Draw a line to display the edge

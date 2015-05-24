@@ -1,13 +1,20 @@
 function GraphsApp() {
     this.initCanvas();
-    this.initGraph();
+    this.initWorld();
+
+    // Initialise camera to be centered on the world's origin
+    this.camera = new Vec2(0.5 * this.ctx.canvas.width, 0.5 * this.ctx.canvas.height);
+
     this.initInput();
+    
+    // Set seed for perlin.js
     noise.seed(42);
-    var fps = 30;
+
+    var fps = 60;
     var me = this;
     /* Schedule the main loop to be called fps times per second, using the 
      * GraphsApp's this context. */
-    setInterval(function() { me.mainLoop.call(me); }, 1000/fps);
+    setInterval(function() { me.mainLoop.call(me); }, 1000 / fps);
 }
 
 GraphsApp.prototype.initCanvas = function() {
@@ -27,21 +34,16 @@ GraphsApp.prototype.initCanvas = function() {
     }
 };
 
-GraphsApp.prototype.initGraph = function() {
+GraphsApp.prototype.initWorld = function() {
     /* Initialize graph with origin at canvas coordinates in the middle of the
      * canvas. */
-    this.graph = new Graph(
-        new Vec2(0.5 * this.ctx.canvas.width, 0.5 * this.ctx.canvas.height)
-    );
-    
-    /* Add a vertex at the origin. */
-    this.graph.addVertex(new Vec2(0, 0));
+    this.world = new World();
 };
 
 GraphsApp.prototype.initInput = function() {
     var inputHandler = new InputHandler();
     var canvas = this.ctx.canvas;
-    var graph = this.graph;
+    var camera = this.camera;
 
     $(document).keydown(function(event){
         inputHandler.keyDown(event.which); 
@@ -60,9 +62,9 @@ GraphsApp.prototype.initInput = function() {
         x -= canvas.offsetLeft + 1; /* <-- Weird! */
         y -= canvas.offsetTop;
 
-        /* Correction for graph coordinate system */
-        x -= graph.origin.x;
-        y -= graph.origin.y;
+        /* Correction for world's coordinate system */
+        x -= camera.x;
+        y -= camera.y;
         return new Vec2(x, y);
     }
     $("#the_canvas").mousedown(function(event) {
@@ -84,7 +86,7 @@ GraphsApp.prototype.initInput = function() {
     this.ih = inputHandler;
 
     // Pass this object to the graph to initialise some redirects.
-    this.graph.initEventRedirects(inputHandler);
+    this.world.initEventRedirects(inputHandler);
 };
 
 GraphsApp.prototype.mainLoop = function() {
@@ -93,10 +95,22 @@ GraphsApp.prototype.mainLoop = function() {
 };
 
 GraphsApp.prototype.update = function() {
-    this.graph.update();
+    this.world.update();
 };
 
 GraphsApp.prototype.draw = function() {
+    // Save the canvas
+    this.ctx.save();
+
+    // Clear canvas
     this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.graph.draw(this.ctx);
+
+    // Translate to the center of the canvas.
+    this.ctx.translate(this.camera.x, this.camera.y);
+
+    // Draw the world
+    this.world.draw(this.ctx);
+    
+    // Restore the canvas
+    this.ctx.restore();
 };

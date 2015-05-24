@@ -1,5 +1,6 @@
-function Vertex(position) {
+function Vertex(position, graph) {
     this.position = position.copy();
+    this.graph = graph;
     this.force = new Vec2(0, 0);
     this.radius = clamp(gaussian(24, 12), 16, 32);
     this.links = [];
@@ -19,7 +20,7 @@ Vertex.prototype.applyForce = function(force) {
     this.force.add(force);
 };
 
-// Add another vertex to the list of neighbours
+// Add another edge to the list of links
 Vertex.prototype.addLink = function(link) {
     this.links.push(link);
 };
@@ -34,7 +35,7 @@ Vertex.prototype.removeLink = function(link) {
     }
 };
 
-// Returns true iff 'v' is a neighbout of this vertex.
+// Returns true iff 'v' is a neighbour of this vertex.
 Vertex.prototype.hasNeighbour = function(v) {
     for (i = 0; i < this.links.length; i++) {
         if (this.links[i].v1 === v || this.links[i].v2 === v) {
@@ -42,13 +43,6 @@ Vertex.prototype.hasNeighbour = function(v) {
         }
     }
     return false;
-};
-
-// Traverses to the vertex's neighbours, and removes the links going to this vertex.
-Vertex.prototype.remove = function() {
-    for (i = 0; i < this.links.length; i++) {
-        this.links[i].traverseFrom(this).removeLink(this.links[i]);
-    }
 };
 
 Vertex.prototype.applyNoiseForce = function(noiseConstant) {
@@ -68,10 +62,16 @@ Vertex.prototype.update = function(maxStepSize) {
 
 Vertex.prototype.select = function() {
     this.selected = true;
+    this.radiusSlider = new Slider(
+        "Radius", this.radius, 16, 32, 'right', this, function(radius) {
+            this.radius = radius;
+        }
+    );
 };
 
 Vertex.prototype.deselect = function() {
     this.selected = false;
+    this.radiusSlider.remove();
 };
 
 Vertex.prototype.draw = function(ctx) {
