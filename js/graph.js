@@ -4,16 +4,11 @@ function Graph(world) {
     this.edges = [];
 }
 
-Graph.prototype.initEventRedirects = function(ih) {
-    ih.registerClickRedirect("left", [86/*V*/], [], this.addVertex, this);
-};
-
 // Add a vertex to the graph with initial position 'position'.
 Graph.prototype.addVertex = function(position) {
     var v = new Vertex(position, this);
 
     this.vertices.push(v);
-    // this.world.addVertex(v);
 
     return v;
 };
@@ -25,7 +20,6 @@ Graph.prototype.addEdge = function(v1, v2) {
     v2.addLink(e);
 
     this.edges.push(e);
-    // this.world.addEdge(e);
 
     return e;
 };

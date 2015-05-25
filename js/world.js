@@ -2,9 +2,15 @@ function World() {
     this.gravitySource = new Vec2(0, 0);
     this.graphs = [];
 
-    this.userGraph = new Graph(this);
+    // Initialise the user graph
+    this.userGraph = new UserGraph(this);
     this.userGraph.addVertex(new Vec2(2, 2));
     this.graphs.push(this.userGraph);
+
+    // Initialise some graph that the user has no control over
+    var someGraph = new Graph(this);
+    someGraph.addVertex(new Vec2(200 * Math.random(), 200 * Math.random()));
+    this.graphs.push(someGraph);
 
     this.selection = [];
 
@@ -84,7 +90,7 @@ World.prototype.addEdgeFromSelectedTo = function(position) {
     	this.deselect();
     	return;
     }
-    if (clicked.graph != this.userGraph) {
+    if (!(clicked.graph instanceof UserGraph)) {
     	// Clicked vertex not belonging to user graph:
     	// Select just that vertex and return.
     	this.deselect();
@@ -102,10 +108,10 @@ World.prototype.addEdgeFromSelectedTo = function(position) {
 	    if (clicked.hasNeighbour(selected)) continue;
 	    
 	    // Selected vertex is from other graph
-	    if (selected.graph != this.userGraph) continue;
+	    if (!(selected.graph instanceof UserGraph)) continue;
 
         // Otherwise, add edge.
-        this.userGraph.addEdge(selected, clicked);
+        selected.graph.addEdge(selected, clicked);
 	}
     this.selectVertex(clicked);
 }
@@ -212,7 +218,7 @@ World.prototype.removeSelected = function() {
     // First remove selected edges.
     // (Because removing vertices first may also result in removing selected edges.)
     for (var i = 0; i < this.selection.length; i++) {
-        if (this.selection[i] instanceof Edge && this.selection[i].graph == this.userGraph) {
+        if (this.selection[i] instanceof Edge && this.selection[i].graph instanceof UserGraph) {
             // Remove edge from graph.
             this.selection[i].graph.removeEdge(this.selection[i]);
 
@@ -225,7 +231,7 @@ World.prototype.removeSelected = function() {
     }
     // Remove selected vertices.
     for (var i = 0; i < this.selection.length; i++) {
-        if (this.selection[i] instanceof Vertex && this.selection[i].graph == this.userGraph) {
+        if (this.selection[i] instanceof Vertex && this.selection[i].graph instanceof UserGraph) {
             // Remove vertex from graph
             this.selection[i].graph.removeVertex(this.selection[i]);
 
@@ -282,7 +288,7 @@ World.prototype.update = function() {
     if (this.selection.length == 1 && this.ih.isMousePressed('left')) {
     	for (var i = 0; i < this.selection.length; i++) {
     		var selected = this.selection[i];
-    		if (selected.graph == this.userGraph && selected instanceof Vertex) {
+    		if (selected.graph instanceof UserGraph && selected instanceof Vertex) {
         		selected.moveTo(this.ih.mouse);
     		}
     	}
