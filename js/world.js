@@ -8,9 +8,9 @@ function World() {
     this.graphs.push(this.userGraph);
 
     // Initialise some graph that the user has no control over
-    var someGraph = new Graph(this);
-    someGraph.addVertex(new Vec2(200 * Math.random(), 200 * Math.random()));
-    this.graphs.push(someGraph);
+    // var someGraph = new Graph(this);
+    // someGraph.addVertex(new Vec2(200 * Math.random(), 200 * Math.random()));
+    // this.graphs.push(someGraph);
 
     this.selection = [];
 
