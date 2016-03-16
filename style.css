@@ -1,0 +1,61 @@
+body {
+    background-color: rgb(235, 235, 235);
+    font-family: courier;
+    font-size: 14px;
+}
+
+canvas {
+    border: 2px solid rgb(50, 50, 50);
+}
+
+.slider {
+    width: 100%;
+}
+
+.parameter {
+    margin: 2px 30px;
+    font-size: 15px;
+}
+
+ul {
+    font-size: 20px;
+    text-align: left;
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+#wrapper {
+    /* Little hack to remove whitespace that causes 100% to be not quite 100% (http://stackoverflow.com/a/5078297) */
+    font-size: 0;
+}
+
+#parameters_left {
+    width: 10%;
+    display: inline-block;
+    text-align: right;
+    vertical-align: top;
+}
+
+#parameters_right {
+    width: 10%;
+    display: inline-block;
+    text-align: left;
+    vertical-align: top;
+}
+
+#canvas_container {
+    width: 80%;
+    display: inline-block;
+    font-size: 14px;
+}
+
+#defaultCanvas {
+    /*display: inline-block;*/
+    margin: 0 auto;
+
+    /* For no selection on double click (http://stackoverflow.com/a/880518) */
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
+}
