@@ -2,9 +2,16 @@ function World() {
     this.gravitySource = new Vec2(0, 0);
     this.graphs = [];
 
-    // Initialise the user graph
+    // Initialise some trivial toy-example graph
     this.userGraph = new UserGraph(this);
-    this.userGraph.addVertex(new Vec2(2, 2));
+    v1 = this.userGraph.addVertex(new Vec2(20, 20));
+    v2 = this.userGraph.addVertex(new Vec2(20, -20));
+    v3 = this.userGraph.addVertex(new Vec2(-20, 20));
+    v4 = this.userGraph.addVertex(new Vec2(-20, -20));
+    this.userGraph.addEdge(v1, v2);
+    this.userGraph.addEdge(v2, v3);
+    this.userGraph.addEdge(v1, v3);
+    this.userGraph.addEdge(v3, v4);
     this.graphs.push(this.userGraph);
 
     // Initialise some graph that the user has no control over
