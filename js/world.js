@@ -21,7 +21,7 @@ function World() {
     this.repulsionConstant = 800;
     this.touchRepulsionConstant = 80;
     this.gravityConstant = 0.1;
-    this.noiseConstant = 1.5;
+    this.noiseConstant = 0.5;
 
     // Slider objects live here. And perhaps other setting setters.
     this.settings = [
